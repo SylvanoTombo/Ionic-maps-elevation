@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { Chart } from 'chart.js';
 
@@ -10,23 +10,37 @@ declare var google;
 })
 export class HomePage {
 
-  @ViewChild('lineCanvas') lineCanvas;
+  @ViewChild('map') mapElement: ElementRef;
+  @ViewChild('lineCanvas') lineCanvas: ElementRef;
+  map: any;
   lineChart: any;
   path: Array<{ lat: number, lng: number }>;
   elevationsData = [];
+  newPath: Array<{ lat: number, lng: number }>;
+  marker: google.maps.Marker;
+  elevations: Array<Object>;
 
   constructor(public navCtrl: NavController) {
-    this.path = [
+   /*  this.path = [
       { lat: 36.579, lng: -118.292 },  // Mt. Whitney
       { lat: 36.606, lng: -118.0638 },  // Lone Pine
       { lat: 36.433, lng: -117.951 },  // Owens Lake
       { lat: 36.588, lng: -116.943 },  // Beatty Junction
       { lat: 36.34, lng: -117.468 },  // Panama Mint Springs
       { lat: 36.24, lng: -116.832 }
-    ];  // Badwater, Death Valley
+    ];  */ // Badwater, Death Valley
+
+    this.newPath = [
+      { lat: -18.88592, lng: 47.53972},
+      { lat: -18.885567, lng: 47.539909},
+      { lat: -18.883654, lng: 47.540888}
+    ];
+
+    this.marker = new google.maps.Marker();
   }
 
   ionViewDidLoad() {
+    this.createMap();
     this.googleMaps();
   }
 
@@ -78,8 +92,8 @@ export class HomePage {
     let elevator = new google.maps.ElevationService;
 
     elevator.getElevationAlongPath({
-      'path': this.path,
-      'samples': 50
+      'path': this.newPath,
+      'samples': 40
     }, this.plotElevation.bind(this));
 
   }
@@ -90,8 +104,10 @@ export class HomePage {
       return;
     }
 
+    this.elevations = elevations;
+
     elevations.map(elevation => {
-      this.elevationsData.push(parseInt(elevation.elevation));
+      this.elevationsData.push(elevation.elevation);
     });
     console.log(elevations);
 
@@ -101,8 +117,19 @@ export class HomePage {
   showPath(event) {
     let activePoints = this.lineChart.getElementAtEvent(event)[0];
     if (activePoints) {
-      console.log(this.elevationsData[activePoints._index]);
+      let point: any = this.elevations[activePoints._index].location;
+      console.log(point)
+      this.marker.setPosition(point);
+      this.marker.setMap(this.map);
     }
+  }
+
+  createMap() {
+    this.map = new google.maps.Map(this.mapElement.nativeElement, {
+      zoom: 15,
+      center: this.newPath[0],
+      mapTypeId: 'terrain'
+    });
   }
 
 }
