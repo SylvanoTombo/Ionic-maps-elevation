@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { Chart } from 'chart.js';
+import { TrackerPage } from '../tracker/tracker';
 
 declare var google;
 
@@ -18,7 +19,7 @@ export class HomePage {
   elevationsData = [];
   newPath: Array<{ lat: number, lng: number }>;
   marker: google.maps.Marker;
-  elevations: Array<Object>;
+  elevations: any;
 
   constructor(public navCtrl: NavController) {
    /*  this.path = [
@@ -130,6 +131,10 @@ export class HomePage {
       center: this.newPath[0],
       mapTypeId: 'terrain'
     });
+  }
+
+  goToTracker() {
+    this.navCtrl.push(TrackerPage);
   }
 
 }
